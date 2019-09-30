@@ -45,9 +45,9 @@ extension \(Constants.Keys.providerName): TargetType {
     }
 
     var headers: [String: String]? {
-        return {
+        return [
             {_headers_}
-        }
+        ]
     }
 }
 """
