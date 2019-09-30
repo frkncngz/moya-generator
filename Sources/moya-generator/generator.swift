@@ -56,7 +56,7 @@ class Generator {
         output = output.replacingOccurrences(of: Constants.Keys.baseUrl, with: from.baseURL)
         output = output.replacingOccurrences(of: Constants.Keys.providerEnums, with: enums(from: from))
         output = output.replacingOccurrences(of: Constants.Keys.pathSwitchCases, with: path(from: from))
-//        print("output \(output)")
+        output = output.replacingOccurrences(of: Constants.Keys.methodSwitchCases, with: method(config: from))
         return output
     }
     class func enums(from: Config) -> String {
@@ -75,13 +75,6 @@ class Generator {
         return enumStrings.joined(separator: String.newline)
     }
     class func path(from: Config) -> String {
-//        case .nodeInfo:
-//        return "/node/status"
-        
-//        case .balance(let address):
-//        return "/addresses/balance/\(address)/0"
-//        var output = ""
-        
         let pathStrings = from.endpoints.map { (endpoint) -> String in
             var input = ""
             var path = endpoint.path
@@ -104,7 +97,6 @@ class Generator {
                         let match = regexWhole.matches(in: path, options: [], range: NSRange(location: 0, length: path.count)).first!
                                                                         
                         let matchedString = String(path.substring(with: match.range)!)
-                        print("matchedString \(matchedString)")
                         
                         if let match = regexInside.matches(in: matchedString, options: [], range: NSRange(location: 0, length: matchedString.count)).first {
                             let variableName = matchedString.substring(with: match.range)
@@ -118,5 +110,28 @@ class Generator {
             return "case .\(endpoint.name)\(input):\(returnString.tabbed(count: 3).newlined())"
         }
         return pathStrings.joined(separator: String.newline + String.tab + String.tab)
+    }
+    class func method(config: Config) -> String {
+        var methods: [String: [String]] = [:]
+        
+        for endpoint in config.endpoints {
+            if var methodArray = methods[endpoint.method] {
+                methodArray.append(endpoint.name)
+                methods[endpoint.method] = methodArray
+            } else {
+                methods[endpoint.method] = [endpoint.name]
+            }
+        }
+        
+        let methodStrings = Array(methods.keys).map { (key) -> String in
+            var methodNames = methods[key]!
+            methodNames = methodNames.map { (methodName) -> String in
+                "." + methodName
+            }
+            let methodNamesString = methodNames.joined(separator: ", ")
+            let returnValue = "return .\(key)".tabbed(count: 3).newlined()            
+            return "case \(methodNamesString):\(returnValue)"
+        }
+        return methodStrings.joined(separator: String.newline + String.tab + String.tab)
     }
 }
