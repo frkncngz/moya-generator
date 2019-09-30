@@ -57,6 +57,7 @@ class Generator {
         output = output.replacingOccurrences(of: Constants.Keys.providerEnums, with: enums(from: from))
         output = output.replacingOccurrences(of: Constants.Keys.pathSwitchCases, with: path(from: from))
         output = output.replacingOccurrences(of: Constants.Keys.methodSwitchCases, with: method(config: from))
+        output = output.replacingOccurrences(of: Constants.Keys.taskSwitchCases, with: task(config: from))
         return output
     }
     class func enums(from: Config) -> String {
@@ -129,9 +130,44 @@ class Generator {
                 "." + methodName
             }
             let methodNamesString = methodNames.joined(separator: ", ")
-            let returnValue = "return .\(key)".tabbed(count: 3).newlined()            
+            let returnValue = "return .\(key)".tabbed(count: 3).newlined()
             return "case \(methodNamesString):\(returnValue)"
         }
         return methodStrings.joined(separator: String.newline + String.tab + String.tab)
+    }
+    class func task(config: Config) -> String {
+        var tasks: [String: [String]] = [:]
+        
+        for endpoint in config.endpoints {
+            if var taskArray = tasks[endpoint.task] {
+                taskArray.append(endpoint.name)
+                tasks[endpoint.task] = taskArray
+            } else {
+                tasks[endpoint.task] = [endpoint.name]
+            }
+        }
+        
+        let taskStrings = Array(tasks.keys).map { (key) -> String in
+            var returnTask = ""
+            var input = ""
+            switch key {
+            case "plain":
+                returnTask = ".requestPlain"
+            case "data":
+                input = "(let data)"
+                returnTask = "Task.requestData(data)"
+            default: break
+            }
+            
+            var taskNames = tasks[key]!
+            taskNames = taskNames.map { (taskName) -> String in
+                "." + taskName + input
+            }
+            let taskNamesString = taskNames.joined(separator: ", ")
+            
+            let returnValue = "return \(returnTask)".tabbed(count: 3).newlined()
+            return "case \(taskNamesString):\(returnValue)"
+        }
+        return taskStrings.joined(separator: String.newline + String.tab + String.tab)
     }
 }

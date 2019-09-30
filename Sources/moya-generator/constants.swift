@@ -13,5 +13,6 @@ struct Constants {
         static var providerEnums = "{_providerEnums_}"
         static var pathSwitchCases = "{_pathSwitchCases_}"
         static var methodSwitchCases = "{_methodSwitchCases_}"
+        static var taskSwitchCases = "{_taskSwitchCases_}"
     }
 }
