@@ -13,24 +13,24 @@ let providerTemplate = """
 import Foundation
 import Moya
 
-enum \(Constants.Keys.providerName) {
-{_providerEnums_}
+enum \(Constants.Keys.ProviderName) {
+{providerEnums}
 }
 
-extension \(Constants.Keys.providerName): TargetType {
+extension \(Constants.Keys.ProviderName): TargetType {
     var baseURL: URL {
-        return URL(string: "{_baseURL_}")!
+        return URL(string: "\(Constants.Keys.BaseUrl)")!
     }
 
     var path: String {
         switch self {
-        {_pathSwitchCases_}
+        \(Constants.Keys.PathSwitchCases)
         }
     }
 
     var method: Moya.Method {
         switch self {
-        {_methodSwitchCases_}
+        \(Constants.Keys.MethodSwitchCases)
         }
     }
 
@@ -40,13 +40,13 @@ extension \(Constants.Keys.providerName): TargetType {
 
     var task: Task {
         switch self {
-        {_taskSwitchCases_}
+        \(Constants.Keys.TaskSwitchCases)
         }
     }
 
     var headers: [String: String]? {
         return [
-            {_headers_}
+            \(Constants.Keys.Headers)
         ]
     }
 }
@@ -54,13 +54,13 @@ extension \(Constants.Keys.providerName): TargetType {
 
 class Generator {
     class func generate(from: Config) -> String {
-        var output = providerTemplate.replacingOccurrences(of: Constants.Keys.providerName, with: from.providerName)
-        output = output.replacingOccurrences(of: Constants.Keys.headers, with: headers(config: from))
-        output = output.replacingOccurrences(of: Constants.Keys.baseUrl, with: from.baseURL)
-        output = output.replacingOccurrences(of: Constants.Keys.providerEnums, with: enums(from: from))
-        output = output.replacingOccurrences(of: Constants.Keys.pathSwitchCases, with: path(from: from))
-        output = output.replacingOccurrences(of: Constants.Keys.methodSwitchCases, with: method(config: from))
-        output = output.replacingOccurrences(of: Constants.Keys.taskSwitchCases, with: task(config: from))
+        var output = providerTemplate.replacingOccurrences(of: Constants.Keys.ProviderName, with: from.providerName)
+        output = output.replacingOccurrences(of: Constants.Keys.Headers, with: headers(config: from))
+        output = output.replacingOccurrences(of: Constants.Keys.BaseUrl, with: from.baseURL)
+        output = output.replacingOccurrences(of: Constants.Keys.ProviderEnums, with: enums(from: from))
+        output = output.replacingOccurrences(of: Constants.Keys.PathSwitchCases, with: path(from: from))
+        output = output.replacingOccurrences(of: Constants.Keys.MethodSwitchCases, with: method(config: from))
+        output = output.replacingOccurrences(of: Constants.Keys.TaskSwitchCases, with: task(config: from))
         return output
     }
     class func enums(from: Config) -> String {
@@ -84,7 +84,7 @@ class Generator {
             var path = endpoint.path
             
             //check if there are arguments to add
-            if let regexInside = try? NSRegularExpression(pattern: #"(?<=\{\_)(.*?)(?=\_\})"#, options: .caseInsensitive) {
+            if let regexInside = try? NSRegularExpression(pattern: Constants.RegEx.Inside, options: .caseInsensitive) {
                 let matches = regexInside.matches(in: path, options: [], range: NSRange(location: 0, length: path.count))
                 if matches.count > 0 {
                     input += "("
@@ -95,7 +95,7 @@ class Generator {
                     input += ")"
                 }
                 
-                if let regexWhole = try? NSRegularExpression(pattern: #"\{\_.*?\_\}"#, options: .caseInsensitive) {
+                if let regexWhole = try? NSRegularExpression(pattern: Constants.RegEx.Whole, options: .caseInsensitive) {
                     while regexWhole.matches(in: path, options: [], range: NSRange(location: 0, length: path.count)).count > 0 {
                         
                         let match = regexWhole.matches(in: path, options: [], range: NSRange(location: 0, length: path.count)).first!

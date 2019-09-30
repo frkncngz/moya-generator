@@ -8,12 +8,16 @@
 import Foundation
 struct Constants {
     struct Keys {
-        static var providerName = "{_providerName_}"
-        static var baseUrl = "{_baseURL_}"
-        static var providerEnums = "{_providerEnums_}"
-        static var pathSwitchCases = "{_pathSwitchCases_}"
-        static var methodSwitchCases = "{_methodSwitchCases_}"
-        static var taskSwitchCases = "{_taskSwitchCases_}"
-        static var headers = "{_headers_}"
+        static var ProviderName = "{providerName}"
+        static var BaseUrl = "{baseURL}"
+        static var ProviderEnums = "{providerEnums}"
+        static var PathSwitchCases = "{pathSwitchCases}"
+        static var MethodSwitchCases = "{methodSwitchCases}"
+        static var TaskSwitchCases = "{taskSwitchCases}"
+        static var Headers = "{headers}"
+    }
+    struct RegEx {
+        static var Inside = #"(?<=\{)(.*?)(?=\})"#
+        static var Whole = #"\{.*?\}"#
     }
 }
