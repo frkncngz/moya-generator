@@ -19,5 +19,11 @@ struct Endpoint: Codable {
     let path: String
     let method: String
     let task: String
-    let additionalHeaders: [[String: String]]?
+//    let additionalHeaders: [[String: String]]?
+    let input: [Input]?
+}
+
+struct Input: Codable {
+    let name: String
+    let type: String
 }
