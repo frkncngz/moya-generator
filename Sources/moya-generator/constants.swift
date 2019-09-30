@@ -14,5 +14,6 @@ struct Constants {
         static var pathSwitchCases = "{_pathSwitchCases_}"
         static var methodSwitchCases = "{_methodSwitchCases_}"
         static var taskSwitchCases = "{_taskSwitchCases_}"
+        static var headers = "{_headers_}"
     }
 }

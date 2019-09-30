@@ -45,7 +45,9 @@ extension \(Constants.Keys.providerName): TargetType {
     }
 
     var headers: [String: String]? {
-        return {_headers_}
+        return {
+            {_headers_}
+        }
     }
 }
 """
@@ -53,6 +55,7 @@ extension \(Constants.Keys.providerName): TargetType {
 class Generator {
     class func generate(from: Config) -> String {
         var output = providerTemplate.replacingOccurrences(of: Constants.Keys.providerName, with: from.providerName)
+        output = output.replacingOccurrences(of: Constants.Keys.headers, with: headers(config: from))
         output = output.replacingOccurrences(of: Constants.Keys.baseUrl, with: from.baseURL)
         output = output.replacingOccurrences(of: Constants.Keys.providerEnums, with: enums(from: from))
         output = output.replacingOccurrences(of: Constants.Keys.pathSwitchCases, with: path(from: from))
@@ -62,16 +65,16 @@ class Generator {
     }
     class func enums(from: Config) -> String {
         let enumStrings = from.endpoints.map { (endpoint) -> String in
-            var inputString = ""
-            if let input = endpoint.input {
-                inputString = "("
-                let inputStrings = input.map { (i) -> String in
+            var paramString = ""
+            if let param = endpoint.params {
+                paramString = "("
+                let paramStrings = param.map { (i) -> String in
                     return "\(i.name): \(i.type)"
                 }
-                inputString += inputStrings.joined(separator: ", ")
-                inputString += ")"
+                paramString += paramStrings.joined(separator: ", ")
+                paramString += ")"
             }
-            return "case \(endpoint.name)\(inputString)".tabbed(count: 1)
+            return "case \(endpoint.name)\(paramString)".tabbed(count: 1)
         }
         return enumStrings.joined(separator: String.newline)
     }
@@ -169,5 +172,17 @@ class Generator {
             return "case \(taskNamesString):\(returnValue)"
         }
         return taskStrings.joined(separator: String.newline + String.tab + String.tab)
+    }
+    
+    // this can be done with (from.headers as AnyObject) as well but it is not pretty formatted.
+    class func headers(config: Config) -> String {
+        var output = ""
+        if let headers = config.headers {
+            let headerArray = Array(headers.keys).map { (key) -> String in
+                "\"\(key)\": \"\(String(describing: headers[key]))\""
+            }
+            output = headerArray.joined(separator: String.newline + String.tab + String.tab + String.tab)
+        }
+        return output
     }
 }

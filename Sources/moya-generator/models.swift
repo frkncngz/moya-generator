@@ -10,7 +10,7 @@ import Foundation
 struct Config: Codable {
     let providerName: String
     let baseURL: String
-    let headers: [[String: String]]?
+    let headers: [String: String]?
     let endpoints: [Endpoint]
 }
 
@@ -20,10 +20,10 @@ struct Endpoint: Codable {
     let method: String
     let task: String
 //    let additionalHeaders: [[String: String]]?
-    let input: [Input]?
+    let params: [Param]?
 }
 
-struct Input: Codable {
+struct Param: Codable {
     let name: String
     let type: String
 }
