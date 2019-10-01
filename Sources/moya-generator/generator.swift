@@ -52,8 +52,13 @@ extension \(Constants.Keys.ProviderName): TargetType {
 }
 """
 
+let modelTemplate = """
+struct \(Constants.Keys.ModelName): Codable {
+    \(Constants.Keys.ModelParameters)
+}
+"""
 class Generator {
-    class func generate(from: Config) -> String {
+    class func generateProvider(from: Config) -> String {
         var output = providerTemplate.replacingOccurrences(of: Constants.Keys.ProviderName, with: from.providerName)
         output = output.replacingOccurrences(of: Constants.Keys.Headers, with: headers(config: from))
         output = output.replacingOccurrences(of: Constants.Keys.BaseUrl, with: from.baseURL)
@@ -266,5 +271,19 @@ class Generator {
             output = headerArray.joined(separator: "," + String.newline + String.tab(count: 3))
         }
         return output
+    }
+    
+    class func generateModels(from: Config) -> String {
+        if let models = from.models {
+            let modelStringArray = models.map { (model) -> String in
+                let modelString = modelTemplate.replacingOccurrences(of: Constants.Keys.ModelName, with: model.name)
+                let parametersStringArray = model.parameters.map { (modelParameter) -> String in
+                    "let \(modelParameter.name): \(modelParameter.type)"
+                }
+                return modelString.replacingOccurrences(of: Constants.Keys.ModelParameters, with: parametersStringArray.joined(separator: String.newline + String.tab))
+            }
+            return modelStringArray.joined(separator: String.newline)
+        }
+        return ""
     }
 }

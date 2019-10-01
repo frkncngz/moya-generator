@@ -15,6 +15,8 @@ struct Constants {
         static var MethodSwitchCases = "{methodSwitchCases}"
         static var TaskSwitchCases = "{taskSwitchCases}"
         static var Headers = "{headers}"
+        static var ModelName = "{modelName}"
+        static var ModelParameters = "{modelParameters}"
     }
     struct RegEx {
         static var Inside = #"(?<=\{)(.*?)(?=\})"#

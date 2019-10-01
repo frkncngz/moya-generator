@@ -22,11 +22,17 @@ let main = command { (filename:String) in
         
         let decoder = JSONDecoder()
         let config = try decoder.decode(Config.self, from: data)
-        let generatedFileContent = Generator.generate(from: config)
         
-        var destination = Path.currentDirectory
-        destination.append("/" + config.providerName + ".swift")
-        try File.write(string: generatedFileContent, toPath: destination)
+        let generatedProviderContent = Generator.generateProvider(from: config)
+        var providerDestination = Path.currentDirectory
+        providerDestination.append("/" + config.providerName + ".swift")
+        try File.write(string: generatedProviderContent, toPath: providerDestination)
+        
+        let generatedModelsContent = Generator.generateModels(from: config)
+        var modelsDestination = Path.currentDirectory
+        modelsDestination.append("/" + config.providerName + "Models.swift")
+        try File.write(string: generatedModelsContent, toPath: modelsDestination)
+        
     } catch {
         print("error \(error)")
     }

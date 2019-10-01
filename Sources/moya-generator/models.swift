@@ -12,6 +12,7 @@ struct Config: Codable {
     let baseURL: String
     let headers: [String: String]?
     let endpoints: [Endpoint]
+    let models: [Model]?
 }
 
 struct Endpoint: Codable {
@@ -29,4 +30,14 @@ struct Parameter: Codable {
     let outputName: String?
     let type: String
     let defaultValue: String?
+}
+
+struct Model: Codable {
+    let name: String
+    let parameters: [ModelParameter]
+}
+
+struct ModelParameter: Codable {
+    let name: String
+    let type: String
 }
