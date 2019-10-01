@@ -8,9 +8,12 @@
 import Foundation
 
 extension String {
-    static var tab = "\t"
+    static var tab = "\t"    
     static var newline = "\n"
     
+    static func tab(count: Int) -> String {
+        return String(repeating: "\t", count: count)
+    }
     func tabbed(count: Int) -> String {
         if count == 0 {
             return self

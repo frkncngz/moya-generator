@@ -16,14 +16,17 @@ struct Config: Codable {
 
 struct Endpoint: Codable {
     let name: String
+    let altName: String?
     let path: String
     let method: String
     let task: String
-//    let additionalHeaders: [[String: String]]?
-    let params: [Param]?
+    let parameters: [Parameter]?
+    let parameterMapping: [String: String]?
 }
 
-struct Param: Codable {
+struct Parameter: Codable {
     let name: String
+    let outputName: String?
     let type: String
+    let defaultValue: String?
 }

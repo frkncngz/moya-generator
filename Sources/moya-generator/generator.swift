@@ -66,13 +66,15 @@ class Generator {
     class func enums(from: Config) -> String {
         let enumStrings = from.endpoints.map { (endpoint) -> String in
             var paramString = ""
-            if let param = endpoint.params {
-                paramString = "("
-                let paramStrings = param.map { (i) -> String in
-                    return "\(i.name): \(i.type)"
+            if let param = endpoint.parameters {
+                if param.count > 0 {
+                    paramString = "("
+                    let paramStrings = param.map { (i) -> String in
+                        return "\(i.name): \(i.type)"
+                    }
+                    paramString += paramStrings.joined(separator: ", ")
+                    paramString += ")"
                 }
-                paramString += paramStrings.joined(separator: ", ")
-                paramString += ")"
             }
             return "case \(endpoint.name)\(paramString)".tabbed(count: 1)
         }
@@ -83,7 +85,9 @@ class Generator {
             var input = ""
             var path = endpoint.path
             
-            //check if there are arguments to add
+            // check if there are any inputs to add
+            // first regex (inside) looks for the variable name and generates the input
+            // second regex (whole) looks for the range in path to change
             if let regexInside = try? NSRegularExpression(pattern: Constants.RegEx.Inside, options: .caseInsensitive) {
                 let matches = regexInside.matches(in: path, options: [], range: NSRange(location: 0, length: path.count))
                 if matches.count > 0 {
@@ -96,12 +100,14 @@ class Generator {
                 }
                 
                 if let regexWhole = try? NSRegularExpression(pattern: Constants.RegEx.Whole, options: .caseInsensitive) {
+                    
+                    // since we are changing the string on place, this loop makes sure we always get the correct range after a change in the string
                     while regexWhole.matches(in: path, options: [], range: NSRange(location: 0, length: path.count)).count > 0 {
                         
                         let match = regexWhole.matches(in: path, options: [], range: NSRange(location: 0, length: path.count)).first!
                                                                         
+                        // Range vs NSRange mambo jambo
                         let matchedString = String(path.substring(with: match.range)!)
-                        
                         if let match = regexInside.matches(in: matchedString, options: [], range: NSRange(location: 0, length: matchedString.count)).first {
                             let variableName = matchedString.substring(with: match.range)
                             path = path.replacingOccurrences(of: matchedString, with: "\\(\(String(describing: variableName)))")
@@ -113,7 +119,7 @@ class Generator {
             let returnString = "return \"\(path)\""
             return "case .\(endpoint.name)\(input):\(returnString.tabbed(count: 3).newlined())"
         }
-        return pathStrings.joined(separator: String.newline + String.tab + String.tab)
+        return pathStrings.joined(separator: String.newline + String.tab(count: 2))
     }
     class func method(config: Config) -> String {
         var methods: [String: [String]] = [:]
@@ -136,11 +142,12 @@ class Generator {
             let returnValue = "return .\(key)".tabbed(count: 3).newlined()
             return "case \(methodNamesString):\(returnValue)"
         }
-        return methodStrings.joined(separator: String.newline + String.tab + String.tab)
+        return methodStrings.joined(separator: String.newline + String.tab(count: 2))
     }
     class func task(config: Config) -> String {
         var tasks: [String: [String]] = [:]
         
+        // we group the endpoints by their task type (plain, data, params)
         for endpoint in config.endpoints {
             if var taskArray = tasks[endpoint.task] {
                 taskArray.append(endpoint.name)
@@ -150,6 +157,7 @@ class Generator {
             }
         }
         
+        // we generate input for plain and data since they are static
         let taskStrings = Array(tasks.keys).map { (key) -> String in
             var returnTask = ""
             var input = ""
@@ -162,16 +170,90 @@ class Generator {
             default: break
             }
             
-            var taskNames = tasks[key]!
-            taskNames = taskNames.map { (taskName) -> String in
-                "." + taskName + input
+            // if the task is params, we need to dynamically generate the input and parameters
+            if key == "parameters" {
+                
+                // iterate everything again for parameters
+                var paramsOutput = ""
+                if let endpointsWithParams = tasks[key] {
+                    let endpointsWithParamsStrings = endpointsWithParams.map { (endpointWithParams) -> String in
+                        
+                        // storing this separately to use it in parameter mappings
+                        var paramsDictionaryStringValues = ""
+                        var paramsDictionaryString = ""
+                        
+                        // find the corresponding endpoint and generate both inputs and parameters
+                        let endpoint = config.endpoints.first { $0.name == endpointWithParams}!
+                        if let params = endpoint.parameters {                            
+                            let paramsArray = params.filter{ $0.defaultValue == nil}.map { (param) -> String in
+                                "let \(param.name)"
+                            }
+                            let paramsDictionaryArray = params.map { (param) -> String in
+                                "\"\(param.outputName ?? param.name)\": \(param.defaultValue ?? param.name)".tabbed(count: 4).newlined()
+                            }
+                            paramsDictionaryStringValues = paramsDictionaryArray.joined(separator: ",")
+                            if paramsArray.count > 0 {
+                                input = "(" + paramsArray.joined(separator: ", ") + ")"
+                            } else {
+                                input = ""
+                            }
+                            paramsDictionaryString += "parameters = [".tabbed(count: 3).newlined()
+                            if paramsDictionaryStringValues == "" {
+                                paramsDictionaryString += ":]"
+                            } else {
+                                paramsDictionaryString += paramsDictionaryStringValues
+                                paramsDictionaryString += "]".tabbed(count: 3).newlined()
+                            }
+                        }
+                        
+                        var returnValue = "let parameters: [String: Any]".tabbed(count: 3).newlined()
+                        returnValue += paramsDictionaryString
+                        
+                        if let parameterMapping = endpoint.parameterMapping {
+                            let mappingKeys = Array(parameterMapping.keys)
+                            let mappingArray = mappingKeys.map { (key) -> String in
+                                if let mappingValue = parameterMapping[key] {
+                                    // special cases:
+                                    // $parameters
+                                    if mappingValue.contains("$parameters") {
+                                        return "\"\(key)\": \(mappingValue.replacingOccurrences(of: "$parameters", with: "parameters"))"
+                                    }
+                                    
+                                    // $altName
+                                    if mappingValue.contains("$altName") {
+                                        if let altName = endpoint.altName {
+                                            return "\"\(key)\": \"\(altName)\""
+                                        }
+                                    }
+                                    
+                                    return "\"\(key)\": \"\(mappingValue)\""
+                                }
+                                return ""
+                            }
+                            
+                            let parametersString = mappingArray.joined(separator: "," + String.newline + String.tab(count: 4)).tabbed(count: 4).newlined()
+                            
+                            returnValue += "return .requestParameters(parameters: [\(parametersString)\("]".tabbed(count: 3).newlined()), encoding: JSONEncoding())".tabbed(count: 3).newlined()
+                        } else {
+                            returnValue += "return .requestParameters(parameters: parameters, encoding: JSONEncoding())".tabbed(count: 3).newlined()
+                        }
+                        return "case .\(endpointWithParams)\(input):\(returnValue)"
+                    }
+                    paramsOutput = endpointsWithParamsStrings.joined(separator: String.newline + String.tab(count: 2))
+                }
+                return paramsOutput
+            } else {
+                var taskNames = tasks[key]!
+                taskNames = taskNames.map { (taskName) -> String in
+                    "." + taskName + input
+                }
+                let taskNamesString = taskNames.joined(separator: ", ")
+                
+                let returnValue = "return \(returnTask)".tabbed(count: 3).newlined()
+                return "case \(taskNamesString):\(returnValue)"
             }
-            let taskNamesString = taskNames.joined(separator: ", ")
-            
-            let returnValue = "return \(returnTask)".tabbed(count: 3).newlined()
-            return "case \(taskNamesString):\(returnValue)"
         }
-        return taskStrings.joined(separator: String.newline + String.tab + String.tab)
+        return taskStrings.joined(separator: String.newline + String.tab(count: 2))
     }
     
     // this can be done with (from.headers as AnyObject) as well but it is not pretty formatted.
@@ -181,7 +263,7 @@ class Generator {
             let headerArray = Array(headers.keys).map { (key) -> String in
                 "\"\(key)\": \"\(String(describing: headers[key]))\""
             }
-            output = headerArray.joined(separator: String.newline + String.tab + String.tab + String.tab)
+            output = headerArray.joined(separator: "," + String.newline + String.tab(count: 3))
         }
         return output
     }
