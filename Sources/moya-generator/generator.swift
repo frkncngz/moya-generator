@@ -53,10 +53,17 @@ extension \(Constants.Keys.ProviderName): TargetType {
 """
 
 let modelTemplate = """
-struct \(Constants.Keys.ModelName): Codable {
-    \(Constants.Keys.ModelParameters)
+struct \(Constants.Keys.ModelName): Codable\(Constants.Keys.ModelEquatable) {
+    \(Constants.Keys.ModelParameters)\(Constants.Keys.ModelCodingKeysPlace)
 }
 """
+
+let codingKeysTemplate = """
+    private enum CodingKeys: String, CodingKey {
+        \(Constants.Keys.ModelCodingKeys)
+    }
+"""
+
 class Generator {
     class func generateProvider(from: Config) -> String {
         var output = providerTemplate.replacingOccurrences(of: Constants.Keys.ProviderName, with: from.providerName)
@@ -276,11 +283,33 @@ class Generator {
     class func generateModels(from: Config) -> String {
         if let models = from.models {
             let modelStringArray = models.map { (model) -> String in
-                let modelString = modelTemplate.replacingOccurrences(of: Constants.Keys.ModelName, with: model.name)
-                let parametersStringArray = model.parameters.map { (modelParameter) -> String in
-                    "let \(modelParameter.name): \(modelParameter.type)"
+                var modelString = modelTemplate.replacingOccurrences(of: Constants.Keys.ModelName, with: model.name)
+                
+                let equatableString = (model.equatable ?? false) ? ", Equatable" : ""
+                modelString = modelString.replacingOccurrences(of: Constants.Keys.ModelEquatable, with: equatableString)
+                
+                let parametersStringArray = model.parameters.map { (parameter) -> String in
+                    "let \(parameter.name): \(parameter.type)"
                 }
-                return modelString.replacingOccurrences(of: Constants.Keys.ModelParameters, with: parametersStringArray.joined(separator: String.newline + String.tab))
+                
+                modelString = modelString.replacingOccurrences(of: Constants.Keys.ModelParameters, with: parametersStringArray.joined(separator: String.newline + String.tab))
+                
+                
+                let specificOutputs = model.parameters.filter {
+                    $0.outputName != nil
+                }
+                if specificOutputs.count > 0 {
+                    let specificOutputsArray = specificOutputs.map { (parameter) -> String in
+                        return "case \(parameter.name) = \"\(parameter.outputName ?? parameter.name)\""
+                    }
+                    let specificOutputsString = specificOutputsArray.joined(separator: String.newline + String.tab(count: 2))
+                    let codingKeysString = codingKeysTemplate.replacingOccurrences(of: Constants.Keys.ModelCodingKeys, with: specificOutputsString)
+                    modelString = modelString.replacingOccurrences(of: Constants.Keys.ModelCodingKeysPlace, with: codingKeysString.newlined().newlined())
+                } else {
+                    modelString = modelString.replacingOccurrences(of: Constants.Keys.ModelCodingKeysPlace, with: "")
+                }
+                
+                return modelString
             }
             return modelStringArray.joined(separator: String.newline)
         }

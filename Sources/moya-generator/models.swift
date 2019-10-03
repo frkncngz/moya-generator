@@ -9,6 +9,7 @@ import Foundation
 
 struct Config: Codable {
     let providerName: String
+    let custom: Bool?
     let baseURL: String
     let headers: [String: String]?
     let endpoints: [Endpoint]
@@ -34,10 +35,6 @@ struct Parameter: Codable {
 
 struct Model: Codable {
     let name: String
-    let parameters: [ModelParameter]
-}
-
-struct ModelParameter: Codable {
-    let name: String
-    let type: String
+    let equatable: Bool?
+    let parameters: [Parameter]
 }

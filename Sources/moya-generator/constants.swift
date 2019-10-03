@@ -17,6 +17,9 @@ struct Constants {
         static var Headers = "{headers}"
         static var ModelName = "{modelName}"
         static var ModelParameters = "{modelParameters}"
+        static var ModelCodingKeysPlace = "{modelCodingKeysPlace}"
+        static var ModelCodingKeys = "{modelCodingKeys}"
+        static var ModelEquatable = "{modelEquatable}"
     }
     struct RegEx {
         static var Inside = #"(?<=\{)(.*?)(?=\})"#

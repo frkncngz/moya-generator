@@ -23,15 +23,28 @@ let main = command { (filename:String) in
         let decoder = JSONDecoder()
         let config = try decoder.decode(Config.self, from: data)
         
+        var destinationFolder = Path.currentDirectory
+        destinationFolder.append("/Providers/\(config.providerName)/")
+        Directory.create(atPath: destinationFolder)
+        
         let generatedProviderContent = Generator.generateProvider(from: config)
-        var providerDestination = Path.currentDirectory
-        providerDestination.append("/" + config.providerName + ".swift")
-        try File.write(string: generatedProviderContent, toPath: providerDestination)
+        let providerDestination = destinationFolder + config.providerName + ".swift"
         
         let generatedModelsContent = Generator.generateModels(from: config)
-        var modelsDestination = Path.currentDirectory
-        modelsDestination.append("/" + config.providerName + "Models.swift")
-        try File.write(string: generatedModelsContent, toPath: modelsDestination)
+        let modelsDestination = destinationFolder + config.providerName + "Models.swift"        
+        
+        guard (config.custom ?? false) else {
+            try File.write(string: generatedProviderContent, toPath: providerDestination)
+            try File.write(string: generatedModelsContent, toPath: modelsDestination)
+            return
+        }
+                
+        if !File.exists(providerDestination) {
+            try File.write(string: generatedProviderContent, toPath: providerDestination)
+        }
+        if !File.exists(modelsDestination) {
+            try File.write(string: generatedModelsContent, toPath: modelsDestination)
+        }
         
     } catch {
         print("error \(error)")
