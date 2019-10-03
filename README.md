@@ -1,6 +1,6 @@
 # moya-generator
 
-A tool that generates several Moya providers and models from given config files.
+A tool that generates several Moya providers and models from given config files. You can check the example project [here](https://github.com/frkncngz/moya-generator-example)
 
 ## Installation
 1. Add `pod 'moya-generator', :podspec => 'https://raw.githubusercontent.com/frkncngz/moya-generator/master/moya-generator.podspec'` to your Podfile and `pod install`
