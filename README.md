@@ -65,97 +65,98 @@ A tool that generates several Moya providers and models from given config files.
     ### Example
     ```json
     {
-	"providerName": "ExampleRPC",
-	"custom": true,
-	"baseURL": "https://example-rpc.trustwalletapp.com",
-	"headers": {
-		"content-type": "application/json",
-		"accept": "application/json"
-	},
-	"endpoints": [
-		{
-			"name": "account",
-			"altName": "account_info",
-			"path": "/",
-			"method": "post",
-			"task": "parameters",
-			"parameters": [
-				{
-					"name": "address",
-					"outputName": "account",
-					"type": "String"
-				},
-				{
-					"name": "strict",
-					"type": "Bool",
-					"fixedValue": "true"
-				},
-				{
-					"name": "ledger_index",
-					"type": "String",
-					"fixedValue": "\"current\""
-				},
-				{
-					"name": "queue",
-					"type": "Bool",
-					"fixedValuefixedValue": "true"
-				}
-			],
-			"parameterMapping": {
-				"params": "[$parameters]",
-				"method": "$altName"
-			}
-		},
-		{
-			"name": "broadcast",
-			"path": "/transactions/broadcast",
-			"method": "post",
-			"task": "data",
-			"parameters": [
-				{
-					"name": "data",
-					"type": "Data"
-				}
-			]
-		},
-		{
-			"name": "transaction",
-			"path": "transactions/info/{hash}",
-			"method": "get",
-			"task": "plain",
-			"parameters": [
-				{
-					"name": "hash",
-					"type": "String"
-				}
-			]
-		}
-	],
-	"models": [
-		{
-			"name": "RippleAccount",			
-			"parameters": [
-				{
-					"name": "data",
-					"outputName": "account_data",
-					"type": "RippleAccountData"
-				}
-			]
-		},
-		{
-			"name": "RippleAccountData",
-			"parameters": [
-				{
-					"name": "Balance",
-					"type": "String"
-				},
-				{
-					"name": "Sequence",
-					"type": "Int64"
-				}
-			]
-		}
-	]
+      "providerName":"ExampleRPC",
+      "custom":true,
+      "baseURL":"https://example-rpc.trustwalletapp.com",
+      "headers":{
+        "content-type":"application/json",
+        "accept":"application/json"
+      },
+      "endpoints":[
+        {
+          "name":"account",
+          "altName":"account_info",
+          "path":"/",
+          "method":"post",
+          "task":"parameters",
+          "parameters":[
+            {
+              "name":"address",
+              "outputName":"account",
+              "type":"String"
+            },
+            {
+              "name":"strict",
+              "type":"Bool",
+              "fixedValue":"true"
+            },
+            {
+              "name":"ledger_index",
+              "type":"String",
+              "fixedValue":"\"current\""
+            },
+            {
+              "name":"queue",
+              "type":"Bool",
+              "fixedValuefixedValue":"true"
+            }
+          ],
+          "parameterMapping":{
+            "params":"[$parameters]",
+            "method":"$altName"
+          }
+        },
+        {
+          "name":"broadcast",
+          "path":"/transactions/broadcast",
+          "method":"post",
+          "task":"data",
+          "parameters":[
+            {
+              "name":"data",
+              "type":"Data"
+            }
+          ]
+        },
+        {
+          "name":"transaction",
+          "path":"transactions/info/{hash}",
+          "method":"get",
+          "task":"plain",
+          "parameters":[
+            {
+              "name":"hash",
+              "type":"String"
+            }
+          ]
+        }
+      ],
+      "models":[
+        {
+          "name":"RippleAccount",
+          "parameters":[
+            {
+              "name":"data",
+              "outputName":"account_data",
+              "type":"RippleAccountData"
+            }
+          ]
+        },
+        {
+          "name":"RippleAccountData",
+          "parameters":[
+            {
+              "name":"Balance",
+              "type":"String"
+            },
+            {
+              "name":"Sequence",
+              "type":"Int64"
+            }
+          ]
+        }
+      ]
+    }
 }
     ```
 
