@@ -4,11 +4,14 @@ A tool that generates several Moya providers and models from given config files.
 
 ## Installation
 1. Add `pod 'moya-generator', :podspec => 'https://raw.githubusercontent.com/frkncngz/moya-generator/master/moya-generator.podspec'` to your Podfile and `pod install`
-2. In Xcode: Click on your project in the file list, choose your target under TARGETS, click the Build Phases tab and add a New Run Script Phase by clicking the little plus icon in the top left
+2. In Xcode: Click on your project in the file list, choose your target under TARGETS, click the Build Phases tab and add a New Run Script Phase by clicking the little plus icon in the top left.
 3. Paste the following script:
 ```
 "${PODS_ROOT}"/moya-generator/moya-generator --inputPath "$SRCROOT"/provider-configs/ --outputPath "$SRCROOT"/"$PROJECT_NAME"
 ```
+4. Drag the new `Run Script` phase above the `Compile Sources`.
+5. Build your project, in Finder you will now see a new `Providers` folder in the `$SRCROOT/$PROJECT_NAME`-folder, drag the the `Providers` folder into your project and uncheck `Copy items if needed`.
+6. Profit.
 
 ## Usage
 1. Create a `provider-configs` folder in your project's root directory
