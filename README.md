@@ -54,6 +54,7 @@ A tool that generates several Moya providers and models from given config files.
 	  ]
   }
   ```
+  
 - `models`: An array that defines the Codable models
   - `name`: Name of the model
   - `equatable`: (Optional) If you set this to true, it will add Equatable protocol next to Codable.
@@ -157,10 +158,6 @@ A tool that generates several Moya providers and models from given config files.
         }
       ]
     }
-```
-
-
-
 
 ## Notes
 - Currently it doesn't support different names for the same input and parameter.
