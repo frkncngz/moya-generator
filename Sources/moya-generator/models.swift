@@ -30,7 +30,7 @@ struct Parameter: Codable {
     let name: String
     let outputName: String?
     let type: String
-    let defaultValue: String?
+    let fixedValue: String?
 }
 
 struct Model: Codable {

@@ -81,7 +81,7 @@ class Generator {
             if let param = endpoint.parameters {
                 if param.count > 0 {
                     paramString = "("
-                    let paramStrings = param.map { (i) -> String in
+                    let paramStrings = param.filter{ $0.fixedValue == nil }.map { (i) -> String in
                         return "\(i.name): \(i.type)"
                     }
                     paramString += paramStrings.joined(separator: ", ")
@@ -197,11 +197,11 @@ class Generator {
                         // find the corresponding endpoint and generate both inputs and parameters
                         let endpoint = config.endpoints.first { $0.name == endpointWithParams}!
                         if let params = endpoint.parameters {                            
-                            let paramsArray = params.filter{ $0.defaultValue == nil}.map { (param) -> String in
+                            let paramsArray = params.filter{ $0.fixedValue == nil}.map { (param) -> String in
                                 "let \(param.name)"
                             }
                             let paramsDictionaryArray = params.map { (param) -> String in
-                                "\"\(param.outputName ?? param.name)\": \(param.defaultValue ?? param.name)".tabbed(count: 4).newlined()
+                                "\"\(param.outputName ?? param.name)\": \(param.fixedValue ?? param.name)".tabbed(count: 4).newlined()
                             }
                             paramsDictionaryStringValues = paramsDictionaryArray.joined(separator: ",")
                             if paramsArray.count > 0 {
