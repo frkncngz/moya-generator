@@ -7,7 +7,7 @@ A tool that generates several Moya providers and models from given config files.
 2. In Xcode: Click on your project in the file list, choose your target under TARGETS, click the Build Phases tab and add a New Run Script Phase by clicking the little plus icon in the top left
 3. Paste the following script:
 ```
-"${PODS_ROOT}"/moya-generator/moya-generator/moya-generator --inputPath "$SRCROOT"/provider-configs/ --outputPath "$SRCROOT"/"$PROJECT_NAME"
+"${PODS_ROOT}"/moya-generator/moya-generator --inputPath "$SRCROOT"/provider-configs/ --outputPath "$SRCROOT"/"$PROJECT_NAME"
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ A tool that generates several Moya providers and models from given config files.
 
 ## Configuration
 - `providerName`: Name of the provider
-- `custom`: (Optional) If you set this to `true`, the Provider and Models will be created only once (if they are not present). If they are created before, the generator will not overwrite them so you can modify them and create custom providers.
+- `custom`: (Optional) If you set this to `true`, the Provider and Models will be created only once (if they are not present). If they are created before, the generator will not overwrite them so you can modify them and create custom providers. If you set this, don't forget to commit the file to your repository.
 - `baseURL`: Base URL of the API
 - `headers`: Default headers
 - `endpoints`: An array that defines the endpoints
